@@ -126,3 +126,62 @@ Commands:
 sudo docker ps -a --format "table {{.ID}}\t{{.Names}}"`
 ```
 
+---
+
+## Query monitor debug
+```php
+do_action( 'qm/debug', 'bar' );
+```
+
+You can use any of the following actions which correspond to PSR-3 and syslog log levels:
+
+- `qm/debug`
+- `qm/info`
+- `qm/notice`
+- `qm/warning`
+- `qm/error`
+- `qm/critical`
+- `qm/alert`
+- `qm/emergency`
+
+A log level of `warning` or higher will trigger a notification in Query Monitor's admin toolbar.
+
+## Profiling[​](https://querymonitor.com/wordpress-debugging/profiling-and-logging/#profiling)
+
+Basic profiling can be performed and displayed in the Timings panel in Query Monitor using actions in your code:
+
+```php
+// Start the 'foo' timer:
+do_action( 'qm/start', 'foo' );
+
+// Run some code
+my_potentially_slow_function();
+
+// Stop the 'foo' timer:
+do_action( 'qm/stop', 'foo' );
+```
+
+The time taken and approximate memory usage used between the `qm/start` and `qm/stop` actions for the given function name will be recorded and shown in the Timings panel. Timers can be nested, although be aware that this reduces the accuracy of the memory usage calculations.
+
+Timers can also make use of laps with the `qm/lap` action:
+
+```php
+// Start the 'bar' timer:
+do_action( 'qm/start', 'bar' );
+
+// Iterate over some data:
+foreach ( range( 1, 10 ) as $i ) {
+    my_potentially_slow_function( $i );
+    do_action( 'qm/lap', 'bar' );
+}
+
+// Stop the 'bar' timer:
+do_action( 'qm/stop', 'bar' );
+```
+
+Finally, the static logging methods on the `QM` class can be used instead of calling `do_action()`:
+
+```php
+QM::error( 'Everything is broken' );
+```
+
